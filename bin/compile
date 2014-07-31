@@ -135,6 +135,12 @@ node_modules/.bin/bower install
     fi
 
     status "Running grunt build task"
-    $frontend_dir/node_modules/.bin/grunt build
+    $frontend_dir/node_modules/.bin/grunt build 2>&1 > $cache_dir/grunt_output
   fi
 )
+exit_code=$?
+if [[ $exit_code != 0 ]]; then
+    cat $cache_dir/grunt_output | indent
+    exit $exit_code
+fi
+rm $cache_dir/grunt_output
