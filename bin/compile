@@ -94,8 +94,14 @@ fi
 
   status "Installing dependencies"
   # Make npm output to STDOUT instead of its default STDERR
-  npm install --userconfig $frontend_dir/.npmrc 2>&1 | indent
+  npm install --userconfig $frontend_dir/.npmrc 2>&1 > $cache_dir/npm_output
 )
+exit_code=$?
+if [[ $exit_code != 0 ]]; then
+    cat $cache_dir/npm_output | indent
+    exit $exit_code
+fi
+rm $cache_dir/npm_output
 
 # Persist goodies like node-version in the slug
 mkdir -p $frontend_dir/.heroku
@@ -123,7 +129,13 @@ rm -rf "$frontend_dir/.node-gyp"
 rm -rf "$frontend_dir/.npm"
 
 status "Running bower install"
-node_modules/.bin/bower install
+(node_modules/.bin/bower install 2>&1 > $cache_dir/bower_output)
+exit_code=$?
+if [[ $exit_code != 0 ]]; then
+    cat $cache_dir/bower_output | indent
+    exit $exit_code
+fi
+rm $cache_dir/bower_output
 
 # Check and run Grunt
 (
