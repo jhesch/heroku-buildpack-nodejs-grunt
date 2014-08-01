@@ -80,7 +80,13 @@ elif test -d $cache_dir/node/node_modules; then
 
   if test -f $cache_dir/node/.heroku/node-version && [ $(cat $cache_dir/node/.heroku/node-version) != "$node_version" ]; then
     status "Node version changed since last build; rebuilding dependencies"
-    npm rebuild 2>&1 | indent
+    (npm rebuild > $cache_dir/npm_rebuild_output 2>&1)
+    exit_code=$?
+    if [[ $exit_code != 0 ]]; then
+      cat $cache_dir/npm_rebuild_output | indent
+      exit $exit_code
+    fi
+    rm $cache_dir/npm_rebuild_output
   fi
 
 fi
@@ -92,16 +98,16 @@ fi
     export_env_dir $env_dir
   fi
 
-  status "Installing dependencies"
+  status "Installing npm dependencies"
   # Make npm output to STDOUT instead of its default STDERR
-  npm install --userconfig $frontend_dir/.npmrc > $cache_dir/npm_output 2>&1
+  npm install --userconfig $frontend_dir/.npmrc > $cache_dir/npm_install_output 2>&1
 )
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
-    cat $cache_dir/npm_output | indent
+    cat $cache_dir/npm_install_output | indent
     exit $exit_code
 fi
-rm $cache_dir/npm_output
+rm $cache_dir/npm_install_output
 
 # Persist goodies like node-version in the slug
 mkdir -p $frontend_dir/.heroku
@@ -128,7 +134,7 @@ status "Cleaning up node-gyp and npm artifacts"
 rm -rf "$frontend_dir/.node-gyp"
 rm -rf "$frontend_dir/.npm"
 
-status "Running bower install"
+status "Installing bower dependencies"
 (node_modules/.bin/bower install > $cache_dir/bower_output 2>&1)
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
@@ -152,7 +158,7 @@ rm $cache_dir/bower_output
 )
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
-    cat $cache_dir/grunt_output | indent
-    exit $exit_code
+  cat $cache_dir/grunt_output | indent
+  exit $exit_code
 fi
 rm $cache_dir/grunt_output
