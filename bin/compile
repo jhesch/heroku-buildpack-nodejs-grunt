@@ -110,10 +110,10 @@ fi
 rm $cache_dir/npm_install_output
 
 # Persist goodies like node-version in the slug
-mkdir -p $frontend_dir/.heroku
+mkdir -p $build_dir/.heroku
 
 # Save resolved node version in the slug for later reference
-echo $node_version > $frontend_dir/.heroku/node-version
+echo $node_version > $build_dir/.heroku/node-version
 
 # Purge node-related cached content, being careful not to purge the top-level
 # cache, for the sake of heroku-buildpack-multi apps.
@@ -128,7 +128,7 @@ if test -d $frontend_dir/node_modules; then
 fi
 
 # Copy goodies to the cache
-cp -r $frontend_dir/.heroku $cache_dir/node
+cp -r $build_dir/.heroku $cache_dir/node
 
 status "Cleaning up node-gyp and npm artifacts"
 rm -rf "$frontend_dir/.node-gyp"
