@@ -94,7 +94,7 @@ fi
 
   status "Installing dependencies"
   # Make npm output to STDOUT instead of its default STDERR
-  npm install --userconfig $frontend_dir/.npmrc 2>&1 > $cache_dir/npm_output
+  npm install --userconfig $frontend_dir/.npmrc > $cache_dir/npm_output 2>&1
 )
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
@@ -129,7 +129,7 @@ rm -rf "$frontend_dir/.node-gyp"
 rm -rf "$frontend_dir/.npm"
 
 status "Running bower install"
-(node_modules/.bin/bower install 2>&1 > $cache_dir/bower_output)
+(node_modules/.bin/bower install > $cache_dir/bower_output 2>&1)
 exit_code=$?
 if [[ $exit_code != 0 ]]; then
     cat $cache_dir/bower_output | indent
@@ -147,7 +147,7 @@ rm $cache_dir/bower_output
     fi
 
     status "Running grunt build task"
-    $frontend_dir/node_modules/.bin/grunt build 2>&1 > $cache_dir/grunt_output
+    $frontend_dir/node_modules/.bin/grunt build > $cache_dir/grunt_output 2>&1
   fi
 )
 exit_code=$?
