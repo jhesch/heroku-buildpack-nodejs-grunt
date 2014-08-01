@@ -140,6 +140,7 @@ if test -d $cache_dir/bower/bower_components; then
 
   status "Pruning cached dependencies not specified in bower.json"
   node_modules/.bin/bower prune 2>&1 | indent
+fi
 
 status "Installing bower dependencies"
 (node_modules/.bin/bower install > $cache_dir/bower_output 2>&1)
