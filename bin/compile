@@ -134,6 +134,13 @@ status "Cleaning up node-gyp and npm artifacts"
 rm -rf "$frontend_dir/.node-gyp"
 rm -rf "$frontend_dir/.npm"
 
+if test -d $cache_dir/bower/bower_components; then
+  status "Restoring bower_components directory from cache"
+  cp -r $cache_dir/bower/bower_components $frontend_dir/app
+
+  status "Pruning cached dependencies not specified in bower.json"
+  node_modules/.bin/bower prune 2>&1 | indent
+
 status "Installing bower dependencies"
 (node_modules/.bin/bower install > $cache_dir/bower_output 2>&1)
 exit_code=$?
@@ -142,6 +149,16 @@ if [[ $exit_code != 0 ]]; then
     exit $exit_code
 fi
 rm $cache_dir/bower_output
+
+# Purge bower-related cached content.
+rm -rf $cache_dir/bower
+mkdir -p $cache_dir/bower
+
+# If app has a node_modules directory, cache it.
+if test -d $frontend_dir/app/bower_components; then
+  status "Caching bower_components directory for future builds"
+  cp -r $frontend_dir/app/bower_components $cache_dir/bower
+fi
 
 # Check and run Grunt
 (
